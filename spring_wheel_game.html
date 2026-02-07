@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧧 新春大冒险转盘 🧧</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+            background: linear-gradient(135deg, #8B0000 0%, #C41E3A 50%, #DC143C 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #FFD700;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+        }
+
+        .subtitle {
+            color: #FFF8DC;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto 30px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8),
+                        inset 0 0 50px rgba(139, 0, 0, 0.5);
+            border: 8px solid #FFD700;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        .wheel-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            pointer-events: none;
+        }
+
+        .wheel-text-item {
+            position: absolute;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #8B0000;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
+            line-height: 1.3;
+            padding: 3px 5px;
+            transform-origin: center center;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #FFD700;
+            z-index: 10;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+        }
+
+        .spin-button {
+            background: linear-gradient(145deg, #FFD700, #FFA500);
+            color: #8B0000;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            border: 3px solid #FFF8DC;
+        }
+
+        .spin-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .spin-button:active {
+            transform: translateY(0);
+        }
+
+        .spin-button:disabled {
+            background: linear-gradient(145deg, #B8860B, #CD853F);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-container {
+            background: linear-gradient(145deg, rgba(255, 248, 220, 0.95), rgba(255, 250, 240, 0.95));
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 4px solid #FFD700;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .result-title {
+            color: #8B0000;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .result-text {
+            color: #C41E3A;
+            font-size: 1.8rem;
+            font-weight: bold;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .decorations {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .lantern {
+            position: absolute;
+            font-size: 3rem;
+            animation: swing 3s ease-in-out infinite;
+        }
+
+        .lantern:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .lantern:nth-child(2) { top: 15%; right: 8%; animation-delay: 0.5s; }
+        .lantern:nth-child(3) { top: 60%; left: 3%; animation-delay: 1s; }
+        .lantern:nth-child(4) { top: 55%; right: 5%; animation-delay: 1.5s; }
+
+        @keyframes swing {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .coin {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        .center-circle {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .wheel-container {
+                width: 300px;
+                height: 300px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .spin-button {
+                padding: 12px 40px;
+                font-size: 1.2rem;
+            }
+
+            .result-text {
+                font-size: 1.4rem;
+            }
+
+            .wheel-segment {
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="decorations">
+        <div class="lantern">🏮</div>
+        <div class="lantern">🏮</div>
+        <div class="lantern">🏮</div>
+        <div class="lantern">🏮</div>
+    </div>
+
+    <div class="container">
+        <h1>🧧 新春大冒险转盘 🧧</h1>
+        <p class="subtitle">转动转盘，抽取你的新春任务！</p>
+
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel"></div>
+            <div class="center-circle">🎯</div>
+        </div>
+
+        <button class="spin-button" id="spinButton" onclick="spinWheel()">🎡 开始转动</button>
+
+        <div class="result-container">
+            <div class="result-title" id="resultTitle">准备好开始了吗？</div>
+            <div class="result-text" id="resultText">点击按钮抽取任务！</div>
+        </div>
+    </div>
+
+    <script>
+        // 新春大冒险任务列表
+        const tasks = [
+            "给长辈拜年送祝福🙏",
+            "帮助家人打扫卫生🧹",
+            "学习一道春节美食🥟",
+            "陪爷爷奶奶聊天💬",
+            "给家里贴春联📜",
+            "整理自己的房间🏠",
+            "给长辈倒茶倒水🍵",
+            "学唱一首春节歌曲🎤",
+            "主动帮忙做家务🧽",
+            "给家人分享春节趣事😄",
+            "学习包饺子🥟",
+            "整理春节期间的照片📸"
+        ];
+
+        const colors = [
+            '#FFE4B5', // 浅杏色
+            '#FFDAB9', // 桃花色
+            '#F0E68C', // 卡其色
+            '#FAFAD2', // 亮菊黄
+            '#FFEFD5', // 木瓜色
+            '#FFFACD', // 柠檬绸色
+            '#FFEBCD', // 杏仁白
+            '#FFDEAD', // 纳瓦霍白
+            '#FFC0CB', // 粉色
+            '#FFB6C1', // 浅粉红
+            '#FFA07A', // 浅鲑鱼色
+            '#FF7F50'  // 珊瑚色
+        ];
+
+        let isSpinning = false;
+        let currentRotation = 0;
+
+        // 初始化转盘
+        function initWheel() {
+            const wheel = document.getElementById('wheel');
+            const segmentAngle = 360 / tasks.length;
+
+            // 创建扇形背景
+            let gradientStr = '';
+            tasks.forEach((task, index) => {
+                const startAngle = index * segmentAngle;
+                const endAngle = (index + 1) * segmentAngle;
+                gradientStr += `${colors[index % colors.length]} ${startAngle}deg ${endAngle}deg, `;
+            });
+            gradientStr = gradientStr.slice(0, -2);
+            wheel.style.background = `conic-gradient(${gradientStr})`;
+
+            // 创建文字容器
+            const textContainer = document.createElement('div');
+            textContainer.className = 'wheel-text';
+            wheel.appendChild(textContainer);
+
+            // 添加文字
+            tasks.forEach((task, index) => {
+                const textItem = document.createElement('div');
+                textItem.className = 'wheel-text-item';
+                textItem.textContent = task;
+                
+                // 计算文字位置（扇形中心）
+                const angleDeg = index * segmentAngle + segmentAngle / 2;
+                const angleRad = angleDeg * (Math.PI / 180);
+                const radiusPercent = 38; // 文字距离中心的百分比
+                const x = 50 + radiusPercent * Math.cos(angleRad);
+                const y = 50 + radiusPercent * Math.sin(angleRad);
+                
+                textItem.style.left = `${x}%`;
+                textItem.style.top = `${y}%`;
+                textItem.style.transform = `translate(-50%, -50%) rotate(${angleDeg}deg)`;
+                
+                textContainer.appendChild(textItem);
+            });
+        }
+
+        // 转动转盘
+        function spinWheel() {
+            if (isSpinning) return;
+
+            isSpinning = true;
+            const spinButton = document.getElementById('spinButton');
+            const wheel = document.getElementById('wheel');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultText = document.getElementById('resultText');
+
+            spinButton.disabled = true;
+            resultTitle.textContent = '转盘转动中...';
+            resultText.textContent = '🎡🎡🎡';
+
+            // 随机选择一个结果
+            const randomIndex = Math.floor(Math.random() * tasks.length);
+            const segmentAngle = 360 / tasks.length;
+
+            // 计算需要旋转的角度（至少转5圈）
+            // 指针在顶部（0点钟方向，即-90度），所以要让选中的扇形转到顶部
+            // 目标角度 = 360 - (扇形中心角度 - 90)
+            const spins = 5;
+            const segmentCenterAngle = randomIndex * segmentAngle + segmentAngle / 2;
+            const targetAngle = 270 - segmentCenterAngle; // 270 = 360 - 90，将顶部设为基准
+            const totalRotation = spins * 360 + targetAngle;
+
+            currentRotation += totalRotation;
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            // 4秒后显示结果
+            setTimeout(() => {
+                isSpinning = false;
+                spinButton.disabled = false;
+
+                resultTitle.textContent = '🎉 你的新春任务是：';
+                resultText.textContent = tasks[randomIndex];
+
+                // 添加一些随机金币
+                createCoins();
+            }, 4000);
+        }
+
+        // 创建金币动画
+        function createCoins() {
+            const decorations = document.querySelector('.decorations');
+            for (let i = 0; i < 5; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'coin';
+                coin.textContent = '💰';
+                coin.style.left = Math.random() * 100 + '%';
+                coin.style.top = Math.random() * 100 + '%';
+                coin.style.animationDelay = Math.random() * 2 + 's';
+                decorations.appendChild(coin);
+
+                // 3秒后移除
+                setTimeout(() => {
+                    coin.remove();
+                }, 3000);
+            }
+        }
+
+        // 页面加载时初始化转盘
+        window.onload = initWheel;
+    </script>
+</body>
+</html>
